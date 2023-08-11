@@ -1,0 +1,9 @@
+https://xialab.s3-us-west-2.amazonaws.com/Duanchen/Scissor_data/scRNA-seq.RData
+
+https://xialab.s3-us-west-2.amazonaws.com/Duanchen/Scissor_data/TCGA_LUAD_exp1.RData
+
+https://xialab.s3-us-west-2.amazonaws.com/Duanchen/Scissor_data/TCGA_LUAD_survival.RData
+
+https://xialab.s3-us-west-2.amazonaws.com/Duanchen/Scissor_data/TCGA_LUAD_exp2.RData
+
+https://xialab.s3-us-west-2.amazonaws.com/Duanchen/Scissor_data/TCGA_LUAD_TP53_mutation.RData
