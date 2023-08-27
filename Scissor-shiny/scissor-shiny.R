@@ -109,24 +109,29 @@ server <- function(input, output, session) {
     bulk_dataset = dataInput2()
     phenotype = dataInput3()
     
-    
-    sc_dataset <- Seurat_preprocessing(sc_dataset, verbose = F)
-    colnames(phenotype) = c('V1','V2','V3')
-    
-    
-    all(colnames(bulk_dataset) == phenotype$V1)
-    phenotype <- phenotype[,2:3]
-    colnames(phenotype) <- c("time", "status")
-    
-    infos1 <- Scissor(bulk_dataset, sc_dataset, phenotype, alpha = 0.05, 
-                      family = "cox", Save_file = 'Scissor_inputs.RData')
-    
-    Scissor_select <- rep(0, ncol(sc_dataset))
-    names(Scissor_select) <- colnames(sc_dataset)
-    Scissor_select[infos1$Scissor_pos] <- 1
-    Scissor_select[infos1$Scissor_neg] <- 2
-    sc_dataset_1 <<- AddMetaData(sc_dataset, metadata = Scissor_select, col.name = "scissor")
+    if(is.null(sc_dataset) | is.null(bulk_dataset) | is.null(phenotype)){
+      warning("Please upload files!")
+    } 
+    else{
+      sc_dataset <- Seurat_preprocessing(sc_dataset, verbose = F)
+      colnames(phenotype) = c('V1','V2','V3')
+      
+      
+      all(colnames(bulk_dataset) == phenotype$V1)
+      phenotype <- phenotype[,2:3]
+      colnames(phenotype) <- c("time", "status")
+      
+      infos1 <- Scissor(bulk_dataset, sc_dataset, phenotype, alpha = 0.05, 
+                        family = "cox", Save_file = 'Scissor_inputs.RData')
+      
+      Scissor_select <- rep(0, ncol(sc_dataset))
+      names(Scissor_select) <- colnames(sc_dataset)
+      Scissor_select[infos1$Scissor_pos] <- 1
+      Scissor_select[infos1$Scissor_neg] <- 2
+      sc_dataset_1 <<- AddMetaData(sc_dataset, metadata = Scissor_select, col.name = "scissor")
+    }
   })
+  
   
   datasetInput_lr <- reactive({
     library(Scissor)
@@ -136,20 +141,25 @@ server <- function(input, output, session) {
     bulk_dataset = dataInput2()
     phenotype = dataInput3()
     
-    sc_dataset <- Seurat_preprocessing(sc_dataset, verbose = F)
-    phenotype <- phenotype
-    tag <- c('wild-type', 'TP53 mutant')
-    infos4 <- Scissor(bulk_dataset, sc_dataset, phenotype, tag = tag, alpha = 0.5, 
-                      family = "binomial", Save_file = "Scissor_LUAD_TP53_mutation.RData")
-    
-    infos5 <- Scissor(bulk_dataset, sc_dataset, phenotype, tag = tag, alpha = 0.2, 
-                      family = "binomial", Load_file = "Scissor_LUAD_TP53_mutation.RData")
-    
-    Scissor_select <- rep(0, ncol(sc_dataset))
-    names(Scissor_select) <- colnames(sc_dataset)
-    Scissor_select[infos5$Scissor_pos] <- 1
-    Scissor_select[infos5$Scissor_neg] <- 2
-    sc_dataset_2 <<- AddMetaData(sc_dataset, metadata = Scissor_select, col.name = "scissor")
+    if(is.null(sc_dataset) | is.null(bulk_dataset) | is.null(phenotype)){
+      warning("Please upload files!")
+    } 
+    else{
+      sc_dataset <- Seurat_preprocessing(sc_dataset, verbose = F)
+      phenotype <- phenotype
+      tag <- c('wild-type', 'TP53 mutant')
+      infos4 <- Scissor(bulk_dataset, sc_dataset, phenotype, tag = tag, alpha = 0.5, 
+                        family = "binomial", Save_file = "Scissor_LUAD_TP53_mutation.RData")
+      
+      infos5 <- Scissor(bulk_dataset, sc_dataset, phenotype, tag = tag, alpha = 0.2, 
+                        family = "binomial", Load_file = "Scissor_LUAD_TP53_mutation.RData")
+      
+      Scissor_select <- rep(0, ncol(sc_dataset))
+      names(Scissor_select) <- colnames(sc_dataset)
+      Scissor_select[infos5$Scissor_pos] <- 1
+      Scissor_select[infos5$Scissor_neg] <- 2
+      sc_dataset_2 <<- AddMetaData(sc_dataset, metadata = Scissor_select, col.name = "scissor")
+    }
   })
   
   output$plot <- renderPlot({
@@ -157,13 +167,22 @@ server <- function(input, output, session) {
     if(input$Type == 'c'){
       datasetInput_cox()
       
-      DimPlot(sc_dataset_1, reduction = 'umap', group.by = 'scissor', cols = c('grey','indianred1','royalblue'),
-              pt.size = 1.2, order = c(2,1))
+      if(!exists("sc_dataset_1")){
+        warning("Please upload files!")
+      } 
+      else{
+        DimPlot(sc_dataset_1, reduction = 'umap', group.by = 'scissor', cols = c('grey','indianred1','royalblue'),
+                pt.size = 1.2, order = c(2,1))
+      }
     } else if(input$Type == 'l'){
       datasetInput_lr()
-      
-      DimPlot(sc_dataset_2, reduction = 'umap', group.by = 'scissor', 
-              cols = c('grey','indianred1','royalblue'), pt.size = 1.2, order = c(2,1))
+      if(!exists("sc_dataset_2")){
+        warning("Please upload files!")
+      } 
+      else{
+        DimPlot(sc_dataset_2, reduction = 'umap', group.by = 'scissor', 
+                cols = c('grey','indianred1','royalblue'), pt.size = 1.2, order = c(2,1))
+      }
     }
   })
   
